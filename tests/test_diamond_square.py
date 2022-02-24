@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.random import Generator, PCG64
 
-from worldgenlib.diamond_square import diamond_square
+from worldgenlib.synthesis import diamond_square
 
 
 def test_diamond_square():
