@@ -1,19 +1,22 @@
 # procgenlib
 
----
+[![PyPI version](https://badge.fury.io/py/procgenlib.svg)](https://pypi.org/project/procgenlib/)
+[![GitHub Pages](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://mcejp.github.io/procgenlib/)
 
-## Test
+## Useful commands
+
+### Test
 
     python -m pytest
 
-## Format check
+### Format check
 
     black --diff **.py
 
-## Type check
+### Type check
 
     mypy procgenlib
 
-## Regenerate docs
+### Regenerate docs
 
     sphinx-build doc doc/_build
