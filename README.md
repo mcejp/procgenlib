@@ -1,10 +1,10 @@
-# worldgenlib
+# procgenlib
 
 ---
 
 ## Test
 
-    pytest
+    python -m pytest
 
 ## Format check
 
@@ -12,4 +12,4 @@
 
 ## Type check
 
-    mypy worldgenlib
+    mypy procgenlib
