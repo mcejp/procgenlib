@@ -16,5 +16,4 @@
 
 ## Regenerate docs
 
-    sphinx-apidoc -o doc procgenlib
-    env PYTHONPATH=. sphinx-build doc doc/_build
+    sphinx-build doc doc/_build
