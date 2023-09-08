@@ -2,10 +2,6 @@ from typing import Tuple, Union
 import numpy as np
 
 
-# Implements https://en.wikipedia.org/wiki/Diamond-square_algorithm
-#
-# Some additional background on distribution of elevation in the real world:
-# https://www.wolfram.com/language/12/new-in-geography/distribution-of-elevations.html
 def diamond_square(
     rng: np.random.Generator,
     square_size: int,
@@ -13,7 +9,56 @@ def diamond_square(
     primary_scale: Union[float, np.ndarray],
     roughness: Union[float, np.ndarray],
     base_level: float = 0,
-):
+) -> np.ndarray:
+    """
+    Generate a fractal terrain using the Diamond-square algorithm.
+
+    This function creates a heightmap of a fractal terrain using the
+    `Diamond-square algorithm <https://en.wikipedia.org/wiki/Diamond-square_algorithm>`_.
+    The generated terrain is represented as a NumPy array.
+
+    Note the algorithm is known to produce some unnatural patterns in the output;
+    see the link above for more details.
+
+    Additional background on distribution of elevation in the real world can be found in the following article:
+    `Distribution of Elevations: New in Wolfram Language 12 <https://www.wolfram.com/language/12/new-in-geography/distribution-of-elevations.html>`_.
+
+
+    :param rng: A NumPy random number generator for reproducible randomness.
+    :param square_size: The edge length of the basic square.
+    :param num_squares: The number of squares to generate along each axis.
+    :param primary_scale: The primary scaling factor(s) for height variation.
+        This can be a single float or a NumPy array matching the terrain dimensions.
+    :param roughness: The roughness factor(s) for height variation.
+        This can be a single float or a NumPy array matching the terrain dimensions.
+    :param base_level: The base level height for the terrain. (default 0)
+
+    :return: A 2D NumPy array representing the generated terrain heightmap.
+        Its dimensions are ``num_squares[0] * square_size + 1`` by ``num_squares[1] * square_size + 1`` samples.
+    :rtype: np.ndarray
+
+
+    :Example:
+
+    Generate a heightmap with specified parameters:
+
+    .. code-block:: python
+
+       import numpy as np
+       from numpy.random import Generator, PCG64
+       from procgenlib.synthesis import diamond_square
+
+       # Create a random number generator
+       rng = Generator(PCG64(12345))
+
+       # Generate the heightmap
+       heightmap = diamond_square(rng,
+                                  square_size=8,
+                                  num_squares=(1, 1),
+                                  primary_scale=1,
+                                  roughness=1)
+    """
+
     sz = square_size
     h = np.zeros((num_squares[0] * sz + 1, num_squares[1] * sz + 1))
 
