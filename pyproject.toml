@@ -1,6 +1,29 @@
 [build-system]
-requires = [
-  "setuptools >= 40.9.0",
-  "wheel",
-]
+requires = ["setuptools >= 68.0"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "procgenlib"
+version = "0.0.1"
+description = "Utilities for procedural generation"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "numpy",
+]
+
+[project.urls]
+Homepage = "https://github.com/mcejp/procgenlib"
+
+[dependency-groups]
+dev = [
+    "black",
+    "mypy",
+    "pytest",
+    "sphinx>=7.4.7",
+]

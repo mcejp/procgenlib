@@ -6,16 +6,16 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-from procgenlib import VERSION
+import importlib.metadata
 
 project = 'procgenlib'
 copyright = '2023, Martin Cejp'
 author = 'Martin Cejp'
 
 # The short X.Y version.
-version = VERSION
+version = importlib.metadata.version("procgenlib")
 # The full version, including alpha/beta/rc tags.
-release = VERSION
+release = version
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
