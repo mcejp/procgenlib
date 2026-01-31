@@ -10,6 +10,7 @@ Welcome to procgenlib's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   procgenlib.input.elevmodel
    procgenlib.synthesis
 
 
