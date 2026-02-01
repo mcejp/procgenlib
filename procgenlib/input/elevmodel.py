@@ -14,7 +14,10 @@ class Format(Enum):
     """Supported elevation data file formats."""
 
     HGT = "hgt"
+    """Uncompressed .hgt files."""
+
     ZIP = "zip"
+    """Zipped .hgt files."""
 
 
 class HgtTileProvider:
@@ -24,7 +27,11 @@ class HgtTileProvider:
     they return a (3601, 3601) int16 NumPy array of elevation values in meters.
     Data is returned in south-to-north order per ISO 6709.
 
-    Tiles can optionally be zipped.
+    When called:
+
+    :param lat: Tile latitude (south-west corner), positive for north.
+    :param lon: Tile longitude (south-west corner), positive for east.
+    :returns: A (3601, 3601) int16 array of elevation values in meters, ordered south-to-north.
     """
 
     def __init__(self, path, *, format, case_convention, zip_pattern):
@@ -53,10 +60,6 @@ class HgtTileProvider:
         if self._format is Format.ZIP:
             zip_path = self._path / self._zip_pattern.format(lat=lat_str, lon=lon_str)
 
-            # AAAAAAAAAAAAAAAA
-            if not zip_path.exists():
-                return np.zeros((3601, 3601), dtype=np.int16)
-
             logger.debug("Load %s", zip_path)
             with zipfile.ZipFile(zip_path, 'r') as z:
                 with z.open(filename) as f:
@@ -71,9 +74,12 @@ class HgtTileProvider:
         return np.flip(tile_data, axis=0)
 
 
-# https://lpdaac.usgs.gov/documents/592/NASADEM_User_Guide_V1.pdf
 class NASADEM_HGT(HgtTileProvider):
-    """Tile provider for `NASADEM <https://lpdaac.usgs.gov/documents/592/NASADEM_User_Guide_V1.pdf>`_ HGT data."""
+    """Tile provider for `NASADEM <https://developers.google.com/earth-engine/datasets/catalog/NASA_NASADEM_HGT_001>`_ HGT data.
+
+    :param path: Directory containing the NASADEM tile files.
+    :param format: File format (:class:`Format`).
+    """
 
     def __init__(self, path, *, format):
         super().__init__(path,
@@ -83,7 +89,11 @@ class NASADEM_HGT(HgtTileProvider):
 
 
 class SRTMGL1(HgtTileProvider):
-    """Tile provider for SRTM Global 1-arcsecond (SRTMGL1) data."""
+    """Tile provider for SRTM Global 1-arcsecond (SRTMGL1) data.
+
+    :param path: Directory containing the SRTMGL1 tile files.
+    :param format: File format (:class:`Format`).
+    """
 
     def __init__(self, path, *, format):
         super().__init__(path,
@@ -96,14 +106,19 @@ def extract(tile_provider_fn: Callable[[int, int], np.ndarray],
             min_latitude: float,
             min_longitude: float,
             max_latitude: float,
-            max_longitude: float) -> Tuple[np.ndarray, float, float, float, float]:
+            max_longitude: float,
+            allow_gaps: True) -> Tuple[np.ndarray, float, float, float, float]:
     """
     Extract elevation data for the given latitude and longitude spans (inclusive of endpoints).
 
     The convention is as per ISO 6709: north latitude is positive, east longitude is positive, decimal degrees are used
 
-    Returns a tuple (height, latitude_span, longitude_span) where:
-        - height is a 2D numpy array of int16 with elevation data in meters
+    :param min_latitude:
+    :param min_longitude:
+    :param max_latitude:
+    :param max_longitude:
+    :param allow_gaps: If a tile file is missing, assume it's ocean and fill with zeros
+    :returns: a tuple (height, latitude_span, longitude_span) where height is a 2D numpy array of int16 with elevation data in meters
     """
 
     # compute span in terms of tiles (1x1 degree each)
@@ -126,7 +141,14 @@ def extract(tile_provider_fn: Callable[[int, int], np.ndarray],
     # fetching could be parallelized if latency is a problem
     for lat in range(tile_min_lat, tile_max_lat + 1):
         for lon in range(tile_min_lon, tile_max_lon + 1):
-            tile_height = tile_provider_fn(lat, lon)
+            try:
+                tile_height = tile_provider_fn(lat, lon)
+            except FileNotFoundError:
+                if allow_gaps:
+                    tile_height = np.zeros((3601, 3601), dtype=np.int16)
+                else:
+                    raise
+
             height[(lat - tile_min_lat) * 3600:(lat - tile_min_lat + 1) * 3600 + 1,
                    (lon - tile_min_lon) * 3600:(lon - tile_min_lon + 1) * 3600 + 1] = tile_height
 
